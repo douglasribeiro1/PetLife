@@ -1,6 +1,5 @@
-const CACHE_NAME = 'petlife-cache-v5';
+const CACHE_NAME = 'petlife-cache-v6';
 const urlsToCache = [
-  './',
   './index.html',
   './manifest.json'
 ];
@@ -15,6 +14,12 @@ self.addEventListener('install', (event) => {
 });
 
 self.addEventListener('fetch', (event) => {
+  // CRITICAL FIX: Do not intercept requests to other domains (CDNs like Tailwind, Fonts, etc.)
+  // This lets the browser handle CORS negotiation natively and prevents "Failed to fetch" errors.
+  if (!event.request.url.startsWith(self.location.origin)) {
+    return;
+  }
+
   // Navigation fallback strategy for SPA
   if (event.request.mode === 'navigate') {
     event.respondWith(
@@ -32,11 +37,11 @@ self.addEventListener('fetch', (event) => {
         if (response) {
           return response;
         }
+
         return fetch(event.request).then(
           (response) => {
             // Check if we received a valid response
-            // Note: We allow opaque responses (type === 'opaque') for CDNs to work loosely
-            if(!response || (response.status !== 200 && response.type !== 'opaque') || response.type === 'error') {
+            if(!response || response.status !== 200 || response.type !== 'basic') {
               return response;
             }
 
@@ -45,11 +50,7 @@ self.addEventListener('fetch', (event) => {
 
             caches.open(CACHE_NAME)
               .then((cache) => {
-                // Don't cache cross-origin opaque responses in the main cache to avoid quota errors or issues
-                // Only cache local files
-                if (event.request.url.startsWith(self.location.origin)) {
-                   cache.put(event.request, responseToCache);
-                }
+                cache.put(event.request, responseToCache);
               });
 
             return response;
