@@ -1,0 +1,5 @@
+{
+  "name": "PetLife PWA",
+  "description": "Um prontuário médico completo para seus pets. Funciona offline com suporte a IndexedDB.",
+  "requestFramePermissions": []
+}
