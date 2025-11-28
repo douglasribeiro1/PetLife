@@ -10,7 +10,7 @@
       darkMode: 'class',
     }
   </script>
-  <link rel="manifest" href="/manifest.json">
+  <link rel="manifest" href="./manifest.json">
   <meta name="theme-color" content="#0d9488">
   <meta name="description" content="Gerencie a saúde do seu pet offline.">
   <style>
@@ -37,7 +37,8 @@
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/sw.js')
+        // Changed to relative path ./sw.js to support GitHub Pages subdirectories
+        navigator.serviceWorker.register('./sw.js')
           .then(registration => {
             console.log('SW registered: ', registration);
           })
