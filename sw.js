@@ -1,10 +1,8 @@
-const CACHE_NAME = 'petlife-cache-v4';
+const CACHE_NAME = 'petlife-cache-v5';
 const urlsToCache = [
   './',
   './index.html',
-  './manifest.json',
-  'https://cdn.tailwindcss.com',
-  'https://aistudiocdn.com/jspdf@^2.5.1'
+  './manifest.json'
 ];
 
 self.addEventListener('install', (event) => {
@@ -37,7 +35,8 @@ self.addEventListener('fetch', (event) => {
         return fetch(event.request).then(
           (response) => {
             // Check if we received a valid response
-            if(!response || response.status !== 200 || response.type !== 'basic') {
+            // Note: We allow opaque responses (type === 'opaque') for CDNs to work loosely
+            if(!response || (response.status !== 200 && response.type !== 'opaque') || response.type === 'error') {
               return response;
             }
 
@@ -46,7 +45,11 @@ self.addEventListener('fetch', (event) => {
 
             caches.open(CACHE_NAME)
               .then((cache) => {
-                cache.put(event.request, responseToCache);
+                // Don't cache cross-origin opaque responses in the main cache to avoid quota errors or issues
+                // Only cache local files
+                if (event.request.url.startsWith(self.location.origin)) {
+                   cache.put(event.request, responseToCache);
+                }
               });
 
             return response;
