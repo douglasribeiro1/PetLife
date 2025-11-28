@@ -1,4 +1,4 @@
-const CACHE_NAME = 'petlife-cache-v3';
+const CACHE_NAME = 'petlife-cache-v4';
 const urlsToCache = [
   './',
   './index.html',
